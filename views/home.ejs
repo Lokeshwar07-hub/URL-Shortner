@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        nav {
+            background: #4f46e5;
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        nav .brand {
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        nav a.logout-btn {
+            color: #fff;
+            text-decoration: none;
+            background: rgba(255,255,255,0.2);
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        nav a.logout-btn:hover { background: rgba(255,255,255,0.35); }
+
+        /* Main container */
+        .container {
+            max-width: 820px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        /* Card */
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin-bottom: 28px;
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            color: #374151;
+            margin-bottom: 18px;
+        }
+
+        /* Form */
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row input[type="text"] {
+            flex: 1;
+            padding: 11px 14px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-row input[type="text"]:focus { border-color: #4f46e5; }
+        .form-row button {
+            padding: 11px 22px;
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .form-row button:hover { background: #4338ca; }
+
+        /* Success banner */
+        .success-banner {
+            background: #ecfdf5;
+            border: 1.5px solid #6ee7b7;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            color: #065f46;
+            font-size: 0.92rem;
+        }
+        .success-banner a {
+            color: #4f46e5;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92rem;
+        }
+        thead tr {
+            background: #f9fafb;
+        }
+        th {
+            text-align: left;
+            padding: 11px 14px;
+            color: #6b7280;
+            font-weight: 600;
+            border-bottom: 1.5px solid #e5e7eb;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f3f4f6;
+            color: #374151;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f9fafb; }
+
+        td a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        td a:hover { text-decoration: underline; }
+
+        .badge {
+            background: #ede9fe;
+            color: #4f46e5;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 0 10px;
+            color: #9ca3af;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <span class="brand">🔗 ShortURL</span>
+    <a href="/user/logout" class="logout-btn">Logout</a>
+</nav>
+
+<div class="container">
+
+    <% if (locals.id) { %>
+    <div class="success-banner">
+        ✅ Short URL created:
+        <a href="http://localhost:8001/<%= id %>" target="_blank">
+            http://localhost:8001/<%= id %>
+        </a>
+    </div>
+    <% } %>
+
+    <div class="card">
+        <h2>Shorten a new URL</h2>
+        <form method="POST" action="/url">
+            <div class="form-row">
+                <input type="text" name="url" placeholder="https://example.com/very/long/url" required />
+                <button type="submit">Shorten</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Your Links</h2>
+        <% if (locals.urls && urls.length > 0) { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Short ID</th>
+                    <th>Original URL</th>
+                    <th>Clicks</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% urls.forEach((url, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td>
+                        <a href="http://localhost:8001/<%= url.shortId %>" target="_blank">
+                            <%= url.shortId %>
+                        </a>
+                    </td>
+                    <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        <%= url.redirectURL %>
+                    </td>
+                    <td><span class="badge"><%= url.visitHistory.length %></span></td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+        <p class="empty-state">No links yet. Shorten your first URL above! 🚀</p>
+        <% } %>
+    </div>
+
+</div>
+</body>
+</html>
